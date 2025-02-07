@@ -7,7 +7,7 @@ import {
 } from "react-leaflet";
 import "leaflet/dist/leaflet.css";
 import L from "leaflet";
-import { LayerContext } from "@/context/layerContext";
+import { LayerContext } from "@/context/LayerContext";
 import { Button } from "../ui/button";
 import { Square } from "lucide-react";
 

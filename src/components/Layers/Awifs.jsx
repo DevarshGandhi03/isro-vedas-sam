@@ -4,7 +4,7 @@ import "leaflet/dist/leaflet.css";
 import L from "leaflet";
 import "leaflet-draw/dist/leaflet.draw.css";
 import "leaflet-draw";
-import { LayerContext } from "@/context/layerContext";
+import { LayerContext } from "@/context/LayerContext";
 import { Button } from "../ui/button";
 import { Square, SquareActivity } from "lucide-react";
 function FixedSquareOverlay({ setBounds }) {
