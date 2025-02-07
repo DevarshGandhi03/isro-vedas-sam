@@ -1,6 +1,6 @@
 import React, { useContext } from "react";
 import "leaflet/dist/leaflet.css";
-import { LayerContext } from "@/context/layerContext";
+import { LayerContext } from "@/context/LayerContext";
 import Awifs from "@/components/Layers/Awifs";
 import Sentinal from "@/components/Layers/Sentinel";
 
