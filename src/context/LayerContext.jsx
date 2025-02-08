@@ -30,6 +30,7 @@ function LayerProvider({ children }) {
   });
   const [fromDate, setFromDate] = useState(null);
   const [toDate, setToDate] = useState(null);
+    const [imageUrl, setImageUrl] = useState(null);
 
   return (
     <LayerContext.Provider
@@ -49,7 +50,7 @@ function LayerProvider({ children }) {
         selectedBandAwifs,
         setSelectedBandAwifs,
         selectedBounds,
-        setSelectedBounds,
+        setSelectedBounds,imageUrl, setImageUrl
       }}
     >
       <div>{children}</div>

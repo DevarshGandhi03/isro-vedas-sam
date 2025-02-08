@@ -1,4 +1,4 @@
-"use client";
+
 import {
   SidebarProvider,
   SidebarTrigger,
@@ -52,6 +52,7 @@ function AppSidebar({ children }) {
     selectedBandAwifs,
     setSelectedBandAwifs,
   } = useContext(LayerContext);
+  
   const [fromOpen, setFromOpen] = useState(false);
   const [toOpen, setToOpen] = useState(false);
 
@@ -66,9 +67,17 @@ function AppSidebar({ children }) {
     const dateObj = parse(dateString, "yyyyMMdd", new Date());
     return format(dateObj, "dd/MM/yyyy");
   };
+  function useSidebar() {
+    const context = React.useContext(SidebarContext)
+    if (!context) {
+      throw new Error("useSidebar must be used within a SidebarProvider.")
+    }
+  
+    return context
+  }
 
   return (
-    <SidebarProvider>
+    <SidebarProvider >
       <Sidebar>
         <SidebarHeader />
         <SidebarContent className="flex flex-col h-full">
