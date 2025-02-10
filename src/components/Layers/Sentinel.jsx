@@ -129,7 +129,6 @@ function Sentinel() {
           }}
           attribution="&copy; OpenStreetMap contributors"
         />
-        <Marker position={[25.026895, 78.529828]} />
       {showOverlay && <FixedSquareOverlay setBounds={setSelectedBounds} />}
       </MapContainer>
     </div>
