@@ -7,6 +7,7 @@ import "leaflet-draw";
 import { LayerContext } from "@/context/LayerContext";
 import { Button } from "../ui/button";
 import { Layers, Square } from "lucide-react";
+import useSidebar from "../ui/sidebar";
 
 function FixedSquareOverlay({ setBounds, isCalled }) {
   const map = useMap();
@@ -43,6 +44,7 @@ function FixedSquareOverlay({ setBounds, isCalled }) {
 function Awifs() {
   const [showOverlay, setShowOverlay] = useState(false);
   const [isCalled, setIsCalled] = useState(false);
+  const { toggleSidebar } = useSidebar();
   const {
     fromDate,
     toDate,
