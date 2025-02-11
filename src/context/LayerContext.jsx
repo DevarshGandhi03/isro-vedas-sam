@@ -28,9 +28,12 @@ function LayerProvider({ children }) {
     g: "4000",
     b: "4000",
   });
-  const [fromDate, setFromDate] = useState(null);
-  const [toDate, setToDate] = useState(null);
-    const [imageUrl, setImageUrl] = useState(null);
+  const [fromDate, setFromDate] = useState(
+    format(new Date(new Date().setDate(new Date().getDate() - 15)), "yyyyMMdd")
+  );
+
+  const [toDate, setToDate] = useState(format(new Date(), "yyyyMMdd"));
+  const [imageUrl, setImageUrl] = useState(null);
 
   return (
     <LayerContext.Provider
@@ -50,7 +53,9 @@ function LayerProvider({ children }) {
         selectedBandAwifs,
         setSelectedBandAwifs,
         selectedBounds,
-        setSelectedBounds,imageUrl, setImageUrl
+        setSelectedBounds,
+        imageUrl,
+        setImageUrl,
       }}
     >
       <div>{children}</div>

@@ -1,14 +1,16 @@
 import React, { useContext } from "react";
 import { X } from "lucide-react";
 import { Button } from "./ui/button";
-import { LayerContext } from "@/context/LayerContext";
+import {useSearchParams } from "react-router-dom";
 
 function ExtractedImage() {
-    const {imageUrl}=useContext(LayerContext)
+  const [searchParams] = useSearchParams();
+  const imageUrl = searchParams.get("wmsUrl");
+  
 
   return (
     <div className="flex justify-center items-center">
-      <img  src={imageUrl}/>
+      <img  src={decodeURIComponent(imageUrl)}/>
     </div>
   );
 }

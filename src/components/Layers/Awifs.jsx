@@ -7,41 +7,33 @@ import "leaflet-draw";
 import { LayerContext } from "@/context/LayerContext";
 import { Button } from "../ui/button";
 import { Layers, Square } from "lucide-react";
-import { useNavigate } from "react-router-dom";
-import useSidebar from "../ui/sidebar";
 
-function FixedSquareOverlay({ setBounds }) {
+function FixedSquareOverlay({ setBounds, isCalled }) {
   const map = useMap();
+  const updateBounds = () => {
+    const centerPoint = map.latLngToContainerPoint(map.getCenter());
+    const halfSize = 150;
+
+    const topLeft = L.point(centerPoint.x - halfSize, centerPoint.y - halfSize);
+    const bottomRight = L.point(
+      centerPoint.x + halfSize,
+      centerPoint.y + halfSize
+    );
+
+    const topLeftLatLng = map.containerPointToLatLng(topLeft);
+    const bottomRightLatLng = map.containerPointToLatLng(bottomRight);
+
+    setBounds([
+      [bottomRightLatLng.lat, topLeftLatLng.lng], // Bottom-left
+      [topLeftLatLng.lat, bottomRightLatLng.lng], // Top-right
+    ]);
+  };
 
   useEffect(() => {
-    if (!map) return;
-
-    const updateBounds = () => {
-      const centerPoint = map.latLngToContainerPoint(map.getCenter());
-      const halfSize = 150;
-      const topLeft = L.point(
-        centerPoint.x - halfSize,
-        centerPoint.y - halfSize
-      );
-      const bottomRight = L.point(
-        centerPoint.x + halfSize,
-        centerPoint.y + halfSize
-      );
-      const topLeftLatLng = map.containerPointToLatLng(topLeft);
-      const bottomRightLatLng = map.containerPointToLatLng(bottomRight);
-      setBounds([
-        [bottomRightLatLng.lat, topLeftLatLng.lng], // Bottom-left
-        [topLeftLatLng.lat, bottomRightLatLng.lng], // Top-right
-      ]);
-    };
-
-    updateBounds();
-    map.on("moveend", updateBounds);
-
-    return () => {
-      map.off("moveend", updateBounds);
-    };
-  }, [map, setBounds]);
+    if (isCalled) {
+      updateBounds();
+    }
+  }, [isCalled]);
 
   return (
     <div className="absolute top-1/2 left-1/2 w-[300px] h-[300px] -translate-x-1/2 -translate-y-1/2 border-2 border-blue-500 z-[9999] pointer-events-none"></div>
@@ -50,8 +42,7 @@ function FixedSquareOverlay({ setBounds }) {
 
 function Awifs() {
   const [showOverlay, setShowOverlay] = useState(false);
-  const { toggleSidebar } = useSidebar();
-  const navigate = useNavigate();
+  const [isCalled, setIsCalled] = useState(false);
   const {
     fromDate,
     toDate,
@@ -63,14 +54,12 @@ function Awifs() {
   } = useContext(LayerContext);
 
   useEffect(() => {
-    if (selectedBounds) {
-      console.log(selectedBounds);
+    if (selectedBounds && isCalled) {
+      fetchImage();
     }
   }, [selectedBounds]);
 
   const fetchImage = () => {
-    if (!selectedBounds) return;
-
     const [[south, west], [north, east]] = selectedBounds; // Extract BBOX coordinates
 
     const wmsUrl =
@@ -78,9 +67,9 @@ function Awifs() {
         /\s+/g,
         ""
       );
-    console.log(wmsUrl);
     setImageUrl(wmsUrl);
-    navigate("/extracted-image");
+    window.open("/extracted-image?wmsUrl=" + encodeURIComponent(wmsUrl));
+    setIsCalled(false);
   };
 
   return (
@@ -92,7 +81,9 @@ function Awifs() {
         <Square />
       </Button>
       <Button
-        onClick={fetchImage}
+        onClick={() => {
+          showOverlay ? setIsCalled(true) : null;
+        }}
         className="absolute top-12 right-2 z-[9999] px-4 py-2  border border-gray-300 shadow-md rounded-md  transition"
       >
         Extract
@@ -127,7 +118,13 @@ function Awifs() {
           }}
           attribution="&copy; OpenStreetMap contributors"
         />
-        {showOverlay && <FixedSquareOverlay setBounds={setSelectedBounds} />}
+        {showOverlay && (
+          <FixedSquareOverlay
+            setBounds={setSelectedBounds}
+            isCalled={isCalled}
+            setIsCalled={setIsCalled}
+          />
+        )}
       </MapContainer>
     </div>
   );
