@@ -1,6 +1,9 @@
 {
-    "rewrites": [
-      { "source": "/(.*)", "destination": "/index.html" }
-    ]
-  }
-  
+  "rewrites": [
+    { "source": "/(.*)", "destination": "/index.html" },
+    {
+      "source": "/api/:path*",
+      "destination": "https://vedas.sac.gov.in/:path*"
+    }
+  ]
+}
