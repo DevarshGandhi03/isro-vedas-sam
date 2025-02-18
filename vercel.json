@@ -1,18 +1,6 @@
 {
-  "rewrites": [
-    {
-      "source": "/api/:path*",
-      "destination": "https://vedas.sac.gov.in/:path*"
-    },
-    {
-      "source": "/(.*)",
-      "destination": "/index.html"
-    }
-  ],
-  "routes": [
-    {
-      "src": "/api/ridam_server2/wms/(.*)",
-      "dest": "https://vedas.sac.gov.in/ridam_server2/wms/$1"
-    }
-  ]
-}
+    "rewrites": [
+      { "source": "/(.*)", "destination": "/index.html" }
+    ]
+  }
+  
