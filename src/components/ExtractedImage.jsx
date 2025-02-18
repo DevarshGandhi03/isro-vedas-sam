@@ -33,7 +33,7 @@ function ExtractedImage() {
   const getImgData = async () => {
     setLoading(true);
     try {
-      const res = await fetch(imgUrl);
+      const res = await fetch(imageUrl);
       const blobData = await res.blob();
       setBlob(blobData);
     } catch (error) {
