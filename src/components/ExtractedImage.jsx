@@ -23,7 +23,11 @@ function ExtractedImage() {
   const [searchParams] = useSearchParams();
   const imageUrl = searchParams.get("wmsUrl");
   const [blob, setBlob] = useState(null);
-  let imgUrl = imageUrl.replace(/^https:\/\/vedas\.sac\.gov\.in\//, "/api/");
+   const isLocal = window.location.hostname === "localhost";
+  let imgUrl = isLocal
+    ? imageUrl.replace(/^https:\/\/vedas\.sac\.gov\.in\//, "/api/")
+    : imageUrl;
+
   const mousePosition = useDebounce(useMousePosition({ id: "myCanvas" }), 300);
 
   useEffect(() => {
@@ -33,7 +37,7 @@ function ExtractedImage() {
   const getImgData = async () => {
     setLoading(true);
     try {
-      const res = await fetch(imageUrl);
+      const res = await fetch(imgUrl);
       const blobData = await res.blob();
       setBlob(blobData);
     } catch (error) {
