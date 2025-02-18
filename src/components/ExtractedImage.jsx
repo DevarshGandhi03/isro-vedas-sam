@@ -23,7 +23,7 @@ function ExtractedImage() {
   const [searchParams] = useSearchParams();
   const imageUrl = searchParams.get("wmsUrl");
   const [blob, setBlob] = useState(null);
-   const isLocal = window.location.hostname === "localhost";
+  const isLocal = window.location.hostname === "localhost";
   let imgUrl = isLocal
     ? imageUrl.replace(/^https:\/\/vedas\.sac\.gov\.in\//, "/api/")
     : `/api/proxy?url=${encodeURIComponent(imageUrl)}`;
