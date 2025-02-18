@@ -26,7 +26,7 @@ function ExtractedImage() {
    const isLocal = window.location.hostname === "localhost";
   let imgUrl = isLocal
     ? imageUrl.replace(/^https:\/\/vedas\.sac\.gov\.in\//, "/api/")
-    : `/api/proxy?url=${imageUrl}`;
+    : `/api/proxy?url=${encodeURIComponent(imageUrl)}`;
 
   const mousePosition = useDebounce(useMousePosition({ id: "myCanvas" }), 300);
 
