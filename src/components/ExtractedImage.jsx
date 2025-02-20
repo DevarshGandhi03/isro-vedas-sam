@@ -12,9 +12,12 @@ import {
   TooltipTrigger,
 } from "./ui/tooltip";
 import { Card } from "./ui/card";
+import axios from "axios";
 
 function ExtractedImage() {
   const [pixelPoints, setPixelPoints] = useState([]);
+  const [embeddings, setEmbeddings] = useState([]);
+  const [loadingText, setLoadingText] = useState("Extracing Image...");
   const [hoverPixelPoints, setHoverPixelPoints] = useState([]);
   const [bgFgIdentifier, setBgFgIdentifier] = useState([]);
   const [tooglePixelPoints, setTooglePixelPoints] = useState(true);
@@ -37,9 +40,22 @@ function ExtractedImage() {
   const getImgData = async () => {
     setLoading(true);
     try {
-      const res = await fetch(imgUrl);
-      const blobData = await res.blob();
+      const formData = new FormData();
+      const res = await axios.get(imgUrl, { responseType: "blob" });
+      const blobData = await res.data;
+      formData.append("image", blobData);
       setBlob(blobData);
+      setLoadingText("Getting Image Embeddings...");
+      try {
+        const res = await axios.post(
+          "https://vedas.sac.gov.in/satsam/api/get_embeddings",
+          formData
+        );
+        const embeddingsArr = await res.data.embeddings;
+        setEmbeddings(embeddingsArr);
+      } catch (error) {
+        console.log(error);
+      }
     } catch (error) {
       console.log("Error fetching image:" + error);
     } finally {
@@ -52,6 +68,10 @@ function ExtractedImage() {
       getImgData();
     }
   }, [imgUrl]);
+
+  useEffect(() => {
+    console.log(embeddings);
+  }, [embeddings]);
 
   useEffect(() => {
     if (!blob) return;
@@ -130,7 +150,7 @@ function ExtractedImage() {
     <div>
       <Loading
         visibilityClass={loading ? "block" : "hidden"}
-        text="Extracting Image..."
+        text={loadingText}
       />
 
       <div
