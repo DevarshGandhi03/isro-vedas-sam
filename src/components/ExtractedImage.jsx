@@ -13,6 +13,8 @@ import {
 } from "./ui/tooltip";
 import { Card } from "./ui/card";
 import axios from "axios";
+import { InferenceSession } from "onnxruntime-web";
+const MODEL_DIR = "/sam_vit_h.onnx"
 
 function ExtractedImage() {
   const [pixelPoints, setPixelPoints] = useState([]);
@@ -145,6 +147,22 @@ function ExtractedImage() {
     setBgFgIdentifier([]);
     setSelectedPointIndex(null);
   };
+  useEffect(() => {
+    const initModel = async () => {
+      try {
+        if (!MODEL_DIR) {
+          console.error("Model directory is not defined.");
+          return;
+        }
+        const session = await InferenceSession.create(MODEL_DIR);
+        setModel(session);
+      } catch (error) {
+        console.error("Error loading ONNX model:", error);
+      }
+    };
+
+    initModel();
+  }, []);
 
   return (
     <div>
