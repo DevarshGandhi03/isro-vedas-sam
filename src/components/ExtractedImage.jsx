@@ -13,8 +13,10 @@ import {
 } from "./ui/tooltip";
 import { Card } from "./ui/card";
 import axios from "axios";
-import { InferenceSession } from "onnxruntime-web";
-const MODEL_DIR = "/sam_vit_h.onnx"
+import { env, InferenceSession, Tensor } from "onnxruntime-web";
+import { handleImageScale } from "@/helpers/calculateScale";
+import { runModelOnUserInteraction } from "@/helpers/modelHelper";
+const MODEL_DIR = "/sam.onnx";
 
 function ExtractedImage() {
   const [pixelPoints, setPixelPoints] = useState([]);
@@ -34,11 +36,19 @@ function ExtractedImage() {
     : `/api/proxy?url=${encodeURIComponent(imageUrl)}`;
 
   const mousePosition = useDebounce(useMousePosition({ id: "myCanvas" }), 300);
+  // States for mask generation
+  
+  const [model, setModel] = useState(null);
+  const [maskImg, setMaskImg] = useState(null);
+  const [tensor, setTensor] = useState(null);
+  const [modelScale, setModelScale] = useState(null);
 
   useEffect(() => {
     setHoverPixelPoints([mousePosition]);
   }, [mousePosition]);
 
+
+// Getting image data and setting tensor
   const getImgData = async () => {
     setLoading(true);
     try {
@@ -54,7 +64,14 @@ function ExtractedImage() {
           formData
         );
         const embeddingsArr = await res.data.embeddings;
+        const embedding = new Tensor(
+          "float32",
+          new Float32Array(embeddingsArr),
+          res.data.shape
+        );
+
         setEmbeddings(embeddingsArr);
+        setTensor(embedding);
       } catch (error) {
         console.log(error);
       }
@@ -70,6 +87,16 @@ function ExtractedImage() {
       getImgData();
     }
   }, [imgUrl]);
+  async function setmodel(blob) {
+    const  samScale  = await handleImageScale(blob);
+
+    setModelScale(samScale);
+  }
+  useEffect(() => {
+    if (blob) {
+      setmodel(blob);
+    }
+  }, [blob]);
 
   useEffect(() => {
     console.log(embeddings);
@@ -115,7 +142,7 @@ function ExtractedImage() {
     } else {
       setSelectedPointIndex(null);
       if (tooglePixelPoints === true) {
-        setPixelPoints([...pixelPoints, { x, y }]);
+        setPixelPoints([...pixelPoints, { x, y, label: 1 }]);
         setBgFgIdentifier([...bgFgIdentifier, "0"]);
         const ctx = canvas.getContext("2d");
         ctx.beginPath();
@@ -123,7 +150,7 @@ function ExtractedImage() {
         ctx.fillStyle = "rgba(0, 150, 255, 1)"; // Semi-transparent blue fill
         ctx.fill();
       } else if (tooglePixelPoints === false) {
-        setPixelPoints([...pixelPoints, { x, y }]);
+        setPixelPoints([...pixelPoints, { x, y, label: 0 }]);
         setBgFgIdentifier([...bgFgIdentifier, "1"]);
         const ctx = canvas.getContext("2d");
         ctx.beginPath();
@@ -154,8 +181,15 @@ function ExtractedImage() {
           console.error("Model directory is not defined.");
           return;
         }
-        const session = await InferenceSession.create(MODEL_DIR);
+        env.wasm.init = true;
+        env.wasm.wasmPaths = "/node_modules/onnxruntime-web/dist/";
+
+        const session = await InferenceSession.create(MODEL_DIR, {
+          executionProviders: ["wasm"], // Try 'cpu' if 'wasm' fails
+        });
+
         setModel(session);
+        console.log("ONNX Model loaded successfully!");
       } catch (error) {
         console.error("Error loading ONNX model:", error);
       }
@@ -163,6 +197,30 @@ function ExtractedImage() {
 
     initModel();
   }, []);
+
+  useEffect(() => {
+    const handleUserInteraction = async (event) => {
+      if (tensor && modelScale && pixelPoints) {
+        try {
+          await runModelOnUserInteraction({
+            clicks: pixelPoints,
+            model: model,
+            modelScale: modelScale,
+            setMaskImg: setMaskImg,
+            tensor: tensor,
+          });
+          // console.log("reaching");
+        } catch (error) {
+          console.error("Error running model on user interaction:", error);
+        }
+      } else {
+        console.log("else reaching");
+        console.log(tensor, modelScale, pixelPoints);
+      }
+    };
+
+    handleUserInteraction();
+  }, [tensor, modelScale, pixelPoints]);
 
   return (
     <div>
@@ -176,7 +234,6 @@ function ExtractedImage() {
           loading ? "hidden" : "block"
         }`}
       >
-        {" "}
         <TooltipProvider>
           <Card className="p-4 fixed left-10 rounded-2xl shadow-lg border border-gray-200 flex flex-col space-y-4">
             <div className="flex flex-col space-y-6">
